@@ -1,0 +1,62 @@
+<project name="SoapUI Test Result" default="testreport" basedir=".">
+	<property name="project_name"  value="TEAM_1_VEHICLE_LIFECYCLE_-_UPGRADABILITY_SMOKE_TEST_STA_1_14"/>
+	<property name="xmlFile_name"  value="TEAM_1_VEHICLE_LIFECYCLE_-_UPGRADABILITY_SMOKE_TEST_1_14.xml"/>
+	<property name="SOAPUI"  value="/home/acmsop/SoapUI-5.4.0/bin/testrunner.sh"/>
+	<property name="ANT"  value="/usr/share/apache-ant/etc"/>
+	
+	<property environment="env"/>
+	<echo message="TEST_LEVEL =  ${env.TEST_LEVEL}" />
+	<echo message="TEST_LEVEL_CLIENT =  ${env.TEST_LEVEL_CLIENT}" />
+	<echo message="client secret KCA =  ${env.AT_client_secret_KCA}" />
+	<echo message="client secret KUA =  ${env.AT_client_secret_KUA}" />
+	<echo message="client secret KSA =  ${env.AT_client_secret_KSA}" />
+	<echo message="client secret KNA =  ${env.AT_client_secret_KNA}" />
+	<!--
+	<tstamp>
+	   <format property="TimerStamp" pattern="yyyyMMdd"  locale="fr,FR" /> 
+	</tstamp>	
+	<echo message="TimerStamp = ${TimerStamp}" />
+	-->
+	<property name="report_dir"  value="REPORTS"/>
+	<property name="reportFile_dir"  value="report_${project_name}"/>
+	<!--<property name="reportFile_dir"  value="report_${TimerStamp}_${project_name}"/>-->
+	<mkdir dir="${report_dir}" />
+	<delete dir="${report_dir}/${reportFile_dir}" failonerror="false" />
+	<mkdir dir="${report_dir}/${reportFile_dir}" />	
+	<mkdir dir="${report_dir}/${reportFile_dir}/HTML" />
+	
+	<target name="soapui">
+		<exec dir="." executable="${SOAPUI}">
+			<!-- https://support.smartbear.com/readyapi/docs/soapui/running/automating/cli.html -->
+			<!-- -D<variable>=<value> -->
+			<!-- -s: Specifies the test suite to be run. If you skip this argument, the runner will execute all test suites in your project. -->
+			<!-- -c: Specifies the test case to be run. If you skip this ar	gument, the runner will execute all test cases in your test project. -->
+			<arg line="-j -f '${report_dir}/${reportFile_dir}'
+			-DTEST_LEVEL=${env.TEST_LEVEL} 
+			-DTEST_LEVEL_CLIENT=${env.TEST_LEVEL} 
+			-DAT_client_secret_KCA=${env.AT_client_secret_KCA} 
+			-DAT_client_secret_KUA=${env.AT_client_secret_KUA} 
+			-DAT_client_secret_KSA=${env.AT_client_secret_KSA} 
+			-DAT_client_secret_KNA=${env.AT_client_secret_KNA} 	
+			-ESTA_EU
+			'${xmlFile_name}'" />
+			<arg value="-x${env.Project_Password}"/>
+		</exec>
+	</target>
+	<target name="testreport" depends="soapui">
+		<junitreport todir="${report_dir}/${reportFile_dir}">
+			<fileset dir="${report_dir}/${reportFile_dir}">
+				<include name="TEST-*.xml"/>
+			</fileset>
+			<report todir="${report_dir}/${reportFile_dir}/HTML"
+				styledir="${ANT}"
+				format="noframes">
+				<!--format="frames">-->
+			</report>
+		</junitreport>
+	</target>
+	
+	<!-- <copy file="${report_dir}/${reportFile_dir}/HTML/junit-noframes.html" tofile="./report_file.html"/> -->
+	<!-- https://ant.apache.org/manual/Tasks/copy.html -->
+	
+</project>
